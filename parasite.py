@@ -4,6 +4,9 @@ from matplotlib import pyplot as plt
 import tkFileDialog
 import cv2
 import numpy as np
+# import gspread
+import csv
+from oauth2client.client import SignedJwtAssertionCredentials
 
 class App(object):
     def __init__(self, root=None):
@@ -28,6 +31,7 @@ class App(object):
         fileMenu2.add_command(label="Run", command=self.count)
         fileMenu2.add_command(label="Edit Cells", command=self.edit_cells)
         fileMenu2.add_command(label="Edit Parasites", command=self.edit_parasites)
+        fileMenu2.add_command(label="Export",command=self.export)
         menubar.add_cascade(label="Image", menu=fileMenu2)
         self.canvas = Canvas(self.root)
         self.canvas.pack(side=LEFT, fill=BOTH)
@@ -139,10 +143,10 @@ class App(object):
         self.np_img = img
         cv2.imwrite('slide1.jpg',img)
         self.img2 = Image.open('slide1.jpg')
-        self.r_img = self.img2.resize((800, 600),Image.ANTIALIAS)
-        self.photo_image = ImageTk.PhotoImage(self.r_img)
+        # self.r_img = self.img2.resize((800, 600),Image.ANTIALIAS)
+        self.photo_image = ImageTk.PhotoImage(self.img2)
         self.canvas.pack_forget()
-        self.canvas = Canvas(self.root, width=800, height=600)
+        self.canvas = Canvas(self.root, width=self.img.size[0], height=self.img.size[1])
         self.canvas.create_image(10, 10, anchor=NW, image=self.photo_image)
         self.canvas.pack(side=LEFT, fill=BOTH)
         self.canvas.config(yscrollcommand=self.scrollbar_vert.set)
@@ -173,27 +177,120 @@ class App(object):
             rad = cir[1]
             if x>(center[0]-(rad+5)) and x<(center[0]+(rad+5)) and y>(center[1]-(rad+5)) and y<(center[1]+(rad+5)):
                 return
-        self.circles.append([(x,y),20])
+        self.circles.append([(x,y),30])
         buff = cv2.imread('slide1.jpg')
-        cv2.circle(buff,(x,y),20,(0,255,0),2)
+        cv2.circle(buff,(x,y),30,(0,255,0),2)
         cv2.imwrite('slide1.jpg',buff)
-        self.canvas.create_oval(x-20,y-20,x+20,y+20,outline="green")
+        self.canvas.create_oval(x-30,y-30,x+30,y+30,outline="green")
 
     def remove(self,event):
         x = event.x
         y = event.y
         print x,y
-        buff = cv2.imread('slide1.jpg')
+        buff2 = cv2.imread(self.filename)
+        for cir in self.circles:
+            center = cir[0]
+            rad = cir[1]
+            if x>(center[0]-(rad+5)) and x<(center[0]+(rad+5)) and y>(center[1]-(rad+5)) and y<(center[1]+(rad+5)):
+                self.circles.remove(cir)
+            else:
+                cv2.circle(buff2,center,rad,(0,255,0),2)
+        for cir in self.checked:
+            center = cir[0]
+            rad = cir[1]
+            cv2.circle(buff2,center,rad,(255,0,0),2)
+        cv2.imwrite('slide1.jpg',buff2)
+        self.img2 = Image.open('slide1.jpg')
+        self.photo_image = ImageTk.PhotoImage(self.img2)
+        self.canvas.pack_forget()
+        self.canvas = Canvas(self.root, width=self.img.size[0], height=self.img.size[1])
+        self.canvas.create_image(10, 10, anchor=NW, image=self.photo_image)
+        self.canvas.pack(side=LEFT, fill=BOTH)
+        self.canvas.config(yscrollcommand=self.scrollbar_vert.set)
+        self.canvas.config(xscrollcommand=self.scrollbar_hor.set)
+        self.canvas.config(scrollregion=self.canvas.bbox(ALL))
+        self.scrollbar_vert.config(command=self.canvas.yview)
+        self.scrollbar_hor.config(command=self.canvas.xview)
+        self.canvas.bind("<Button-1>",self.add)
+        self.canvas.bind("<Button-3>",self.remove)
+            
 
     def add_p(self,event):
         x = event.x
         y = event.y
         print x,y
+        for cir in self.checked:
+            center = cir[0]
+            rad = cir[1]
+            if x>(center[0]-(rad+5)) and x<(center[0]+(rad+5)) and y>(center[1]-(rad+5)) and y<(center[1]+(rad+5)):
+                return
+        self.checked.append([(x,y),20])
+        buff = cv2.imread('slide1.jpg')
+        cv2.circle(buff,(x,y),20,(255,0,0),2)
+        cv2.imwrite('slide1.jpg',buff)
+        self.canvas.create_oval(x-20,y-20,x+20,y+20,outline="red")
 
     def remove_p(self,event):
         x = event.x
         y = event.y
         print x,y
+        buff2 = cv2.imread(self.filename)
+        for cir in self.circles:
+            center = cir[0]
+            rad = cir[1]
+            cv2.circle(buff2,center,rad,(0,255,0),2)
+        for cir in self.checked:
+            center = cir[0]
+            rad = cir[1]
+            if x>(center[0]-(rad+5)) and x<(center[0]+(rad+5)) and y>(center[1]-(rad+5)) and y<(center[1]+(rad+5)):
+                self.checked.remove(cir)
+            else:
+                cv2.circle(buff2,center,rad,(255,0,0),2)
+        cv2.imwrite('slide1.jpg',buff2)
+        self.img2 = Image.open('slide1.jpg')
+        self.photo_image = ImageTk.PhotoImage(self.img2)
+        self.canvas.pack_forget()
+        self.canvas = Canvas(self.root, width=self.img.size[0], height=self.img.size[1])
+        self.canvas.create_image(10, 10, anchor=NW, image=self.photo_image)
+        self.canvas.pack(side=LEFT, fill=BOTH)
+        self.canvas.config(yscrollcommand=self.scrollbar_vert.set)
+        self.canvas.config(xscrollcommand=self.scrollbar_hor.set)
+        self.canvas.config(scrollregion=self.canvas.bbox(ALL))
+        self.scrollbar_vert.config(command=self.canvas.yview)
+        self.scrollbar_hor.config(command=self.canvas.xview)
+        self.canvas.bind("<Button-1>",self.add_p)
+        self.canvas.bind("<Button-3>",self.remove_p)
+
+    # def export(self):
+    #     scope = ['https://spreadsheets.google.com/feeds']
+    #     credentials = SignedJwtAssertionCredentials('190922689116-38i0f8bhegkdivggve8qivk12gkbdm6v.apps.googleusercontent.com', 'g3_HZuRqhAKCTK86a5qpcw5P', scope)
+    #     gc = gspread.authorize(credentials)
+    #     wks = gc.open("parasite_data").sheet1
+    #     i = 1
+    #     col_list = wks.col_values(1)
+    #     for value in col_list:
+    #         if value == None:
+    #             break
+    #         i+=1
+    #     wks.update_acell('A%s'%(i),len(self.circles))
+    #     wks.update_acell('B%s'%(i),len(self.checked))
+    #     return
+    def export(self):
+        i = 0
+        with open('results.csv') as cfile:
+            reader = csv.DictReader(cfile)
+            for row in reader:
+                i+=1
+        with open('results.csv', 'a') as cfile: 
+            fields = ['Cells','Parasites']
+            writer = csv.DictWriter(cfile, fieldnames = fields)
+            if i>= 1:
+                writer.writerow({'Cells': str(len(self.circles)), 'Parasites': str(len(self.checked))})
+            else:
+                writer.writeheader()
+                writer.writerow({'Cells': str(len(self.circles)), 'Parasites': str(len(self.checked))})
+        print "DONE"
+        
 
 def main():
     root = Tk()
