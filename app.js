@@ -10,6 +10,8 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 
 var routes = require('./routes/routes');
 var auth = require('./routes/auth');
+var schema = require('./models/model');
+var User = schema.User;
 
 var app = express();
 
@@ -22,10 +24,13 @@ var CALLBACKURL = process.env.CALLBACKURL || require('./oauth.js').facebook.call
 mongoose.connect(mongoURI);
 
 passport.serializeUser(function(user, done) {
-done(null, user);
+	done(null, {id: user.facebookId, name: user.name});
 });
+
 passport.deserializeUser(function(obj, done) {
-done(null, obj);
+	User.findOne({facebookId: obj.id}, function(err, user){
+		done(null, user);
+	});
 });
 
 passport.use(new FacebookStrategy({
@@ -35,8 +40,16 @@ passport.use(new FacebookStrategy({
  // profileFields: ['id', 'displayName']
 }, 
 function(accessToken, refreshToken, profile, done) {
- process.nextTick(function () {//change once user model is available
-   return done(null, profile);
+ User.findOne({facebookId: profile.id}, function (err, user) {
+   if (user){
+   	return done(null, user);
+   } else{
+   	var user = new User({name: profile.displayName, facebookId: profile.id});
+   	user.save(function(err, user){
+   		return done(null, user);
+   	})
+   }
+   
  });
 }
 ));
@@ -56,6 +69,9 @@ app.use(passport.session());
 
 app.get('/', routes.homeRender)
 app.get('/home', routes.indexRender)
+
+app.get('/session/user', ensureAuthenticated, auth.getUsername);
+app.post('/session/end', ensureAuthenticated, auth.logout);
 app.get('/auth/facebook', passport.authenticate('facebook'), auth.fbAuth);
 app.get('/auth/facebook/callback',passport.authenticate('facebook', { failureRedirect: '/' }), auth.fbAuthCallback);
 
@@ -65,5 +81,5 @@ app.listen(PORT, function() {
 
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
-    res.send(401)
+    res.sendStatus(401)
 }

@@ -16,6 +16,8 @@
       templateUrl: '../templates/index.html',
       // controller: 'IndexController',
       // controllerAs: 'index'
+    }).when('/401', {
+      redirectTo: '/'
     }).otherwise({redirectTo: '/home'});
 
     //so weird hashes aren't in the urls
