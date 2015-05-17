@@ -7,6 +7,7 @@ var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
+var multer  = require('multer');
 
 var routes = require('./routes/routes');
 var auth = require('./routes/auth');
@@ -66,9 +67,18 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(multer({
+  dest: './public/img/',
+  rename: function (fieldname, filename) {
+    //something here to makesure files are all different names
+    return filename.replace(/\W+/g, '-').toLowerCase()
+  }
+}))
 
 app.get('/', routes.homeRender)
 app.get('/home', routes.indexRender)
+
+app.post('/upload', ensureAuthenticated, routes.uploadHandler)
 
 app.get('/session/user', ensureAuthenticated, auth.getUsername);
 app.post('/session/end', ensureAuthenticated, auth.logout);

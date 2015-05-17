@@ -13,7 +13,8 @@ var imageSchema = Schema({
 	cells: [[Number,Number]],
 	parasites: [[Number,Number]],
 	cellCount: Number,
-	parasiteCount: Number
+	parasiteCount: Number,
+	_uploader : { type: Number, ref: 'User' }
 })
 
 exports.Images = mongoose.model('Image', imageSchema);
