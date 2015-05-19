@@ -75,21 +75,23 @@ app.use(multer({
 }))
 app.use(express.static(path.join(__dirname, 'public')));
 
+// render the pages pre and post fb login
 app.get('/', routes.homeRender)
 app.get('/home', routes.indexRender)
-
+//image related routes
 app.post('/upload', ensureAuthenticated, routes.uploadHandler)
 app.get('/userImages', ensureAuthenticated, routes.imageGetter)
-
+//login routes
 app.get('/session/user', ensureAuthenticated, auth.getUsername);
 app.post('/session/end', ensureAuthenticated, auth.logout);
 app.get('/auth/facebook', passport.authenticate('facebook'), auth.fbAuth);
 app.get('/auth/facebook/callback',passport.authenticate('facebook', { failureRedirect: '/' }), auth.fbAuthCallback);
 
+//start app
 app.listen(PORT, function() {
   console.log("Application running on port:", PORT);
 });
-
+//function to limit access based on login
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
     res.sendStatus(401)

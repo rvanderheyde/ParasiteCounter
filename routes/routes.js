@@ -15,6 +15,7 @@ routes.indexRender = function(req, res) {
 };
 
 routes.uploadHandler = function(req, res){
+	//updates db on upload of a file
 	console.log(req.files);
 	User.findOne({facebookId: req.user.facebookId}, function(err, user){
 		Images.findOne({name: req.files.file.name}, function(err, image){
@@ -35,6 +36,7 @@ routes.uploadHandler = function(req, res){
 };
 
 routes.imageGetter = function(req, res){
+	//searches the db to get user's images
 	console.log(req.user.images);
 	var imageList = []
 	Images.find({_uploader: req.user.facebookId}, function(err, images){
@@ -44,7 +46,6 @@ routes.imageGetter = function(req, res){
 			} else {
 				break
 			}
-			// imageList.push('parasite1.tif')
 		}
 		res.send({imageList: imageList})
 	})

@@ -9,6 +9,7 @@
       controller: 'CounterController',
       controllerAs: 'edit'
     }).when('/home#_=_', {
+      //so facebook login will work(instead of changing url)
       templateUrl: '../templates/index.html',
       controller: 'IndexController',
       controllerAs: 'index'
@@ -31,6 +32,7 @@
     });
   }]);  
   app.directive('fileModel', ['$parse', function ($parse) {
+    //directive to allow multipart/form-data transfer
     return {
         restrict: 'A',
         link: function(scope, element, attrs) {
@@ -46,6 +48,7 @@
     };
   }]);
   app.service('fileUpload', ['$http', function ($http) {
+    //allows for easy multipart/form-data
     this.uploadFileToUrl = function(file, uploadUrl){
         var fd = new FormData();
         fd.append('file', file);
@@ -60,6 +63,7 @@
     }
   }]);
   app.service('tiffCanvas', ['$http',function ($http){
+    //Loads tiff images into a Canvas
     this.loadImage = function (filename) {
       Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
        var xhr = new XMLHttpRequest();
@@ -84,6 +88,7 @@
          };
   }]);
   app.controller('IndexController', ['$scope','fileUpload','$http', function($scope, fileUpload, $http){
+    //Index page controller: gets a user's images, lists them, and calls file upload service 
     $http.get('/userImages').success(function(data, status, headers, config){
       console.log(data);
       $scope.Images = []
@@ -105,9 +110,14 @@
     };
   }]);
   app.controller('CounterController', ['$http', '$location','tiffCanvas', function($http, $location, tiffCanvas){
+    //Loads images then applies opencv
     console.log($location.path())
     var path = $location.path().split('/');
-    var filename = '/img/'+path[2];
-    tiffCanvas.loadImage(filename)
+    var imgType = path[2].split('.')[1];
+    if (imgType == 'tif'){
+      //TIFF images only
+      var filename = '/img/'+path[2];
+      tiffCanvas.loadImage(filename)
+    }
   }]);
 })();
