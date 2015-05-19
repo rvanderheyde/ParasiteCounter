@@ -1,5 +1,5 @@
 (function(){
-  var app = angular.module("Pcount", ['ngRoute', 'ngCookies', 'nav-directives','ngFileUpload']);
+  var app = angular.module("Pcount", ['ngRoute', 'ngCookies', 'nav-directives']);
   //Router to handle the views
   app.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider){
     $routeProvider.when('/', {
@@ -16,6 +16,10 @@
       templateUrl: '../templates/index.html',
       controller: 'IndexController',
       controllerAs: 'index'
+    }).when('/image/:name', {
+      templateUrl: '../templates/count.html',
+      controller: 'CounterController',
+      controllerAs: 'count'
     }).when('/401', {
       redirectTo: '/'
     }).otherwise({redirectTo: '/home'});
@@ -55,40 +59,55 @@
         });
     }
   }]);
-  app.controller('IndexController', ['$scope','fileUpload', function($scope,fileUpload){
+  app.service('tiffCanvas', ['$http',function ($http){
+    this.loadImage = function (filename) {
+      Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
+       var xhr = new XMLHttpRequest();
+       xhr.open('GET', filename);
+       xhr.responseType = 'arraybuffer';
+       xhr.onload = function (e) {
+         var buffer = xhr.response;
+         var tiff = new Tiff({buffer: buffer});
+         var canvas = tiff.toCanvas(); 
+         var width =  tiff.width();
+         var height = tiff.height();
+        if (canvas) {
+          var $elem = $('<div><div><a href="' + filename + '">' +
+            filename +
+            ' (width: ' + width + ', height:' + height + ')' +
+            '</a></div></div>');
+          $elem.append(canvas);
+          $('body').append($elem);
+       }
+           };
+           xhr.send();
+         };
+  }]);
+  app.controller('IndexController', ['$scope','fileUpload','$http', function($scope, fileUpload, $http){
+    $http.get('/userImages').success(function(data, status, headers, config){
+      console.log(data);
+      $scope.Images = []
+      for (var i=0; i<data.imageList.length; i++){
+        var temp = data.imageList[i].split('/')
+        $scope.Images.push(temp[2])
+      }
+    }).error(function(data,status){
+      console.log(status);
+      console.log(data);
+    })
+
     $scope.uploadFile = function(){
         var file = $scope.myFile;
         console.log('file is ' + JSON.stringify(file));
+        $scope.Images.push(file.name)
         var uploadUrl = "/upload";
         fileUpload.uploadFileToUrl(file, uploadUrl);
     };
   }]);
-  // app.controller('IndexController',[ '$scope', 'Upload', function($scope, Upload) {
-  //   $scope.$watch('files', function () {
-  //       $scope.upload($scope.files);
-  //   });
-
-  //   $scope.upload = function (files) {
-  //       if (files && files.length) {
-  //           for (var i = 0; i < files.length; i++) {
-  //               var file = files[i];
-  //               console.log(file)
-  //               Upload.http({
-  //                   url: '/upload',
-  //                   headers: {
-  //                     'Content-Type': file.type
-  //                   },
-  //                   // fields: {'username': $scope.username},
-  //                   data: file
-  //               }).progress(function (evt) {
-  //                   var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
-  //                    $scope.log = 'progress: ' + progressPercentage + '% ' +
-  //                               evt.config.file.name + '\n' + $scope.log;
-  //               }).success(function (data, status, headers, config) {
-  //                   console.log(data)
-  //               });
-  //           }
-  //       }
-  //   };
-  // }]);
+  app.controller('CounterController', ['$http', '$location','tiffCanvas', function($http, $location, tiffCanvas){
+    console.log($location.path())
+    var path = $location.path().split('/');
+    var filename = '/img/'+path[2];
+    tiffCanvas.loadImage(filename)
+  }]);
 })();

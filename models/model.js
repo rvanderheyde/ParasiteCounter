@@ -14,7 +14,8 @@ var imageSchema = Schema({
 	parasites: [[Number,Number]],
 	cellCount: Number,
 	parasiteCount: Number,
-	_uploader : { type: Number, ref: 'User' }
+	_uploader : { type: Number, ref: 'User' },
+	date: { type: Date, default: Date.now }
 })
 
 exports.Images = mongoose.model('Image', imageSchema);

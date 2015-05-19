@@ -59,7 +59,6 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
     secret: 'This is not a secret ;)',
     resave: false,
@@ -71,14 +70,16 @@ app.use(multer({
   dest: './public/img/',
   rename: function (fieldname, filename) {
     //something here to makesure files are all different names
-    return filename.replace(/\W+/g, '-').toLowerCase()
+    return filename.replace(/\W+/g, '-').toLowerCase()+Date.now()
   }
 }))
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', routes.homeRender)
 app.get('/home', routes.indexRender)
 
 app.post('/upload', ensureAuthenticated, routes.uploadHandler)
+app.get('/userImages', ensureAuthenticated, routes.imageGetter)
 
 app.get('/session/user', ensureAuthenticated, auth.getUsername);
 app.post('/session/end', ensureAuthenticated, auth.logout);

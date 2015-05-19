@@ -16,14 +16,39 @@ routes.indexRender = function(req, res) {
 
 routes.uploadHandler = function(req, res){
 	console.log(req.files);
-	Images.findOne({name: req.files.file.name}, function(err, image){
-		console.log(image)
-		if (image){
+	User.findOne({facebookId: req.user.facebookId}, function(err, user){
+		Images.findOne({name: req.files.file.name}, function(err, image){
+			console.log(image)
+			if (image){
 
-		} else {
-			res.send('')
-		}
+			} else {
+				var image = new Images({name: req.files.file.name, cells:[], parasites:[], _uploader: req.user.facebookId})
+				image.save(function(err){
+					user.images.push(image)
+					user.save(function(err){})
+				})
+				res.send('')
+			}
+		})
 	})
+	
+};
+
+routes.imageGetter = function(req, res){
+	console.log(req.user.images);
+	var imageList = []
+	Images.find({_uploader: req.user.facebookId}, function(err, images){
+		for(var i=0; i<images.length;i++){
+			if (i<5){
+				imageList.push('/img/'+images[i].name);
+			} else {
+				break
+			}
+			// imageList.push('parasite1.tif')
+		}
+		res.send({imageList: imageList})
+	})
+	
 };
 
 function emptyObjTest(obj){

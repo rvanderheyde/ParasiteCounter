@@ -1,19 +1,13 @@
 <div>
 	<nav-bar></nav-bar>
 	<!-- Users images -->
-	<!-- Upload image -->
-	<!-- <div ng-controller="IndexController">
-		<div ngf-drop ngf-select ng-model="files" class="file-field" 
-        ngf-drag-over-class="dragover" ngf-multiple="true" ngf-allow-dir="true"
-        accept="image/*,application/pdf">Drop pdfs or images here or click to upload</div>
-	   <div class="btn" ngf-select ngf-change="upload($files)" ngf-multiple="multiple">Select File</div>
-	   <img|audio|video ngf-src="$files">
-	   Upload Log:
-    	<pre>{{log}}</pre>
-	</div> -->
 	<div ng-controller="IndexController">
-		<input type="file" file-model="myFile"/>
-		<button ng-click="uploadFile()">upload me</button>
+		<div ng-repeat="image in Images">
+			<a href="/image/{{image}}">{{image}}</a>
+		</div>
+	<!-- Upload image -->
+		<input class="file-field" type="file" file-model="myFile"/>
+		<button class="btn" ng-click="uploadFile()">upload me</button>
 	</div>
 	<!-- process image when clicked on -->
 </div>
