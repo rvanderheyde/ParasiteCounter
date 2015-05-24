@@ -81,6 +81,7 @@ app.get('/home', routes.indexRender)
 //image related routes
 app.post('/upload', ensureAuthenticated, routes.uploadHandler)
 app.get('/userImages', ensureAuthenticated, routes.imageGetter)
+app.post('/counter', ensureAuthenticated, routes.useOpenCV)
 //login routes
 app.get('/session/user', ensureAuthenticated, auth.getUsername);
 app.post('/session/end', ensureAuthenticated, auth.logout);

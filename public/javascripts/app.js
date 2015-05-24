@@ -76,10 +76,10 @@
          var width =  tiff.width();
          var height = tiff.height();
         if (canvas) {
-          var $elem = $('<div><div><a href="' + filename + '">' +
+          var $elem = $('<div class="content"><div><p>' +
             filename +
             ' (width: ' + width + ', height:' + height + ')' +
-            '</a></div></div>');
+            '</p></div></div>');
           $elem.append(canvas);
           $('body').append($elem);
        }
@@ -114,10 +114,58 @@
     console.log($location.path())
     var path = $location.path().split('/');
     var imgType = path[2].split('.')[1];
+
+    this.onDblClick = function(ev){
+      function clearSelection() {
+        if(document.selection && document.selection.empty) {
+            document.selection.empty();
+        } else if(window.getSelection) {
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+        }
+      }
+      clearSelection();
+    }
+
+    this.onSingleClick = function(ev){
+
+    }
+
+    this.clearAll = function(){
+      $(".content").remove();
+      tiffCanvas.loadImage(filename);
+    }
+
     if (imgType == 'tif'){
       //TIFF images only
       var filename = '/img/'+path[2];
-      tiffCanvas.loadImage(filename)
+      tiffCanvas.loadImage(filename);
+      //fix the canvas drawing problem. 
+      var counter=this;
+      this.callCounter = function(){
+        var val = $("#threshold").val();
+        $http.post('/counter', {filename: filename, val: val}).success(function(data, status, headers, config){
+          console.log(data);
+          counter.data = data;
+          var elem = document.getElementsByTagName("CANVAS");
+          console.log(elem[0]);
+          elem[0].addEventListener('dblclick', function(ev){counter.onDblClick(ev)})
+          elem[0].addEventListener('click', function(ev){counter.onSingleClick(ev)})
+          if (elem[0]){
+            var ctx = elem[0].getContext("2d");
+            ctx.fillStyle = "FF0000";
+            for(var i=0; i<data.areas.length; i++){   
+              ctx.beginPath();
+              var r = Math.sqrt(data.areas[i]/Math.PI);
+              var cx = data.centers[i][0];
+              var cy = data.centers[i][1];
+              ctx.arc(cx,cy,r,0, Math.PI*2);
+              ctx.stroke();
+              ctx.closePath();
+            }
+          }
+        });
+      } 
     }
   }]);
 })();

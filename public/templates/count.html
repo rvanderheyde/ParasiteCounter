@@ -1,0 +1,8 @@
+<nav-bar></nav-bar>
+<div ng-controller="CounterController as counter">
+	<div class="range-field">
+	<input type="range" id="threshold" value="50" min="20" max="100">
+	<button class="btn" ng-click="counter.callCounter()">Run</button>
+	<button class="btn" ng-click="counter.clearAll()">Clear</button>
+	</div>
+</div>
