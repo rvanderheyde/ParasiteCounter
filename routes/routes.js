@@ -56,6 +56,7 @@ routes.imageGetter = function(req, res){
 routes.useOpenCV = function (req, res){
 	// var filename = '../public/img/slide1.png'
 	var filename = path.join(__dirname, '../public'+req.body.filename);
+	var lowThresh = req.body.val1;
 	var highThresh = req.body.val;
 	// var filename = './parasite1.tif';
 	console.log(filename);
@@ -68,7 +69,6 @@ routes.useOpenCV = function (req, res){
   			if (width < 1 || height < 1){
   				throw new Error('No size')
   			} else {
-  				var lowThresh = 20;
 				var nIters = 2;
 				var maxArea = 1000;
 				var count = 0;
