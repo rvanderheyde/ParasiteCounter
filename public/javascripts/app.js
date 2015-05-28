@@ -197,37 +197,38 @@
     }
 
     this.onSingleClick = function(ev){
-      counter.clicks++
-      if (counter.clicks===1){
-        counter.timer = setTimeout(function(){
-          var x = ev.layerX;
-          var y = ev.layerY;
-          var val = $("#threshold").val();
-          var r = val;
-          counter.drawn.push([x,y,r])
-          counter.count+=1;
-          var elem = document.getElementsByTagName("CANVAS");
-          if (elem.length){
-            console.log('Drawing')
-            console.log(counter.count)
-            var ctx = elem[0].getContext("2d");
-            ctx.fillStyle = "FF0000";
-            ctx.strokeStyle = "00FF00";
-            ctx.beginPath();
-            ctx.arc(x,y,r,0, Math.PI*2);
-            ctx.stroke();
-            ctx.closePath();
-            $scope.$apply();
-          }  
+      if(ev.pageY>350){
+        counter.clicks++
+        if (counter.clicks===1){
+          counter.timer = setTimeout(function(){
+            var x = ev.layerX;
+            var y = ev.layerY;
+            var val = $("#threshold").val();
+            var r = val;
+            counter.drawn.push([x,y,r])
+            counter.count+=1;
+            var elem = document.getElementsByTagName("CANVAS");
+            if (elem.length){
+              console.log('Drawing')
+              console.log(counter.count)
+              var ctx = elem[0].getContext("2d");
+              ctx.fillStyle = "FF0000";
+              ctx.strokeStyle = "00FF00";
+              ctx.beginPath();
+              ctx.arc(x,y,r,0, Math.PI*2);
+              ctx.stroke();
+              ctx.closePath();
+              $scope.$apply();
+            }  
+            counter.clicks = 0;
+          }, counter.DELAY)
+          
+        } else {
+          clearTimeout(counter.timer)
+          counter.onDblClick(ev)
           counter.clicks = 0;
-        }, counter.DELAY)
-        
-      } else {
-        clearTimeout(counter.timer)
-        counter.onDblClick(ev)
-        counter.clicks = 0;
+        }
       }
-      
     }
 
     this.clearAll = function(filename){
