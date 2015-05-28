@@ -1,5 +1,5 @@
 var path = require('path');
-var cv = require('../node_modules/opencv/lib/opencv.js')
+var cv = require('opencv')
 var schema = require('../models/model');
 var User = schema.User;
 var Images = schema.Images;
