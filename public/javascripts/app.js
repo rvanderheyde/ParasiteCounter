@@ -250,8 +250,8 @@
             counter.data = data;
             var elem = document.getElementsByTagName("CANVAS");
             console.log(elem[0]);
-            elem[0].addEventListener('dblclick', function(ev){ev.preventDefault()})
-            elem[0].addEventListener('click', function(ev){counter.onSingleClick(ev)})
+            document.addEventListener('dblclick', function(ev){ev.preventDefault()})
+            document.addEventListener('click', function(ev){counter.onSingleClick(ev)})
             if (elem.length){
               var ctx = elem[0].getContext("2d");
               for(var i=0; i<data.areas.length; i++){  

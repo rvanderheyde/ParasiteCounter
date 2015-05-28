@@ -27,6 +27,7 @@
     "mongoose": "^4.0.3",
     "morgan": "^1.5.3",
     "multer": "^0.1.8",
+    "node-pre-gyp": "^0.6.7",
     "opencv": "^3.0.0",
     "passport": "^0.2.1",
     "passport-facebook": "^2.0.0",
