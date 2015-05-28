@@ -65,7 +65,7 @@
   app.service('tiffCanvas', ['$http',function ($http){
     //Loads tiff images into a Canvas
     this.loadImage = function (filename, data, drawn) {
-      Tiff.initialize({TOTAL_MEMORY: 16777216 * 100});
+      Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
        var xhr = new XMLHttpRequest();
        xhr.open('GET', filename);
        xhr.responseType = 'arraybuffer';
