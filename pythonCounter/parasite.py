@@ -53,6 +53,8 @@ class App(object):
         if self.filename == None:
             return
         self.img = Image.open(self.filename)
+        w, h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
+        self.img = self.img.resize((w,h))
         self.photo_image = ImageTk.PhotoImage(self.img)
         self.canvas.pack_forget()
         self.canvas = Canvas(self.root, width=self.img.size[0], height=self.img.size[1])
@@ -144,6 +146,8 @@ class App(object):
         cv2.imwrite('slide1.jpg',img)
         self.img2 = Image.open('slide1.jpg')
         # self.r_img = self.img2.resize((800, 600),Image.ANTIALIAS)
+        w, h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
+        self.img2 = self.img2.resize((w,h))
         self.photo_image = ImageTk.PhotoImage(self.img2)
         self.canvas.pack_forget()
         self.canvas = Canvas(self.root, width=self.img.size[0], height=self.img.size[1])
@@ -294,7 +298,8 @@ class App(object):
 
 def main():
     root = Tk()
-    root.geometry("250x150+300+300")
+    w, h = root.winfo_screenwidth(), root.winfo_screenheight()
+    root.geometry("%dx%d+0+0" % (w, h))
     app = App(root)
     app.run()
 
