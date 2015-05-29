@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 import tkFileDialog
 import cv2
 import numpy as np
+import math
 # import gspread
 import csv
 from oauth2client.client import SignedJwtAssertionCredentials
@@ -70,7 +71,9 @@ class App(object):
         self.root.mainloop()
 
     def count(self):
-        img = cv2.imread(self.filename)
+        imgTemp = cv2.imread(self.filename)
+        w, h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
+        img = cv2.resize(imgTemp, (w,h), interpolation=cv2.INTER_AREA)
         gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
         def get_contours(gray):
@@ -179,7 +182,8 @@ class App(object):
         for cir in self.circles:
             center = cir[0]
             rad = cir[1]
-            if x>(center[0]-(rad+5)) and x<(center[0]+(rad+5)) and y>(center[1]-(rad+5)) and y<(center[1]+(rad+5)):
+            d = math.sqrt(math.pow(x-center[0],2)+math.pow(y-center[1],2))
+            if rad>d:
                 return
         self.circles.append([(x,y),30])
         buff = cv2.imread('slide1.jpg')
@@ -191,20 +195,31 @@ class App(object):
         x = event.x
         y = event.y
         print x,y
-        buff2 = cv2.imread(self.filename)
-        for cir in self.circles:
+        print self.filename
+        buff = cv2.imread(self.filename)
+        w, h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
+        buff2 = cv2.resize(buff, (w,h), interpolation=cv2.INTER_AREA)
+        for i,cir in enumerate(self.circles):
             center = cir[0]
             rad = cir[1]
-            if x>(center[0]-(rad+5)) and x<(center[0]+(rad+5)) and y>(center[1]-(rad+5)) and y<(center[1]+(rad+5)):
-                self.circles.remove(cir)
+            d = math.sqrt(math.pow(x-center[0],2)+math.pow(y-center[1],2))
+            if rad>d:
+                print "removed"
+                print cir
+                # self.circles.remove(cir)
+                del self.circles[i]
+
             else:
                 cv2.circle(buff2,center,rad,(0,255,0),2)
         for cir in self.checked:
             center = cir[0]
             rad = cir[1]
             cv2.circle(buff2,center,rad,(255,0,0),2)
+
         cv2.imwrite('slide1.jpg',buff2)
         self.img2 = Image.open('slide1.jpg')
+        w, h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
+        self.img2 = self.img2.resize((w,h))
         self.photo_image = ImageTk.PhotoImage(self.img2)
         self.canvas.pack_forget()
         self.canvas = Canvas(self.root, width=self.img.size[0], height=self.img.size[1])
@@ -238,7 +253,9 @@ class App(object):
         x = event.x
         y = event.y
         print x,y
-        buff2 = cv2.imread(self.filename)
+        buff = cv2.imread(self.filename)
+        w, h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
+        buff2 = cv2.resize(buff, (w,h), interpolation=cv2.INTER_AREA)
         for cir in self.circles:
             center = cir[0]
             rad = cir[1]
